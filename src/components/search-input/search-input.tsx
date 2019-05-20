@@ -1,6 +1,7 @@
 import * as React from 'react';
 import styled from 'styled-components';
 import Hashtag from "../hashtag";
+import Tweet from "../tweet";
 
 const Input = styled.input`
   border: none;
@@ -13,8 +14,16 @@ const HashtagsWrapper = styled.div`
   display: flex;
 `;
 
+const TweetsWrapper = styled.div`
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+`;
+
 interface IState {
   hashtags: String[];
+  tweets: Object[];
 }
 
 interface IProps {
@@ -26,7 +35,8 @@ export default class SearchInput extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      hashtags: []
+      hashtags: [],
+      tweets: [],
     };
   }
 
@@ -55,6 +65,8 @@ export default class SearchInput extends React.Component<IProps, IState> {
       this.setState({hashtags});
 
       this.searchTweets(hashtags.join(' '), this.props.apiUrl).then(result => {
+          const data = JSON.parse(result.data);
+          this.setState({tweets: data.statuses});
           console.log("result: ", JSON.parse(result.data));
         },
         error => {
@@ -78,9 +90,16 @@ export default class SearchInput extends React.Component<IProps, IState> {
       this.setState({hashtags});
     };
     const hashtags: String[] = this.state.hashtags;
+    const tweetsData = this.state.tweets;
     const items = hashtags.map((item: string, index: number) => {
       return (
-        <Hashtag index={index} del={del} text={item} key={index} />
+        <Hashtag index={index} del={del} text={item} key={index}/>
+      );
+    });
+
+    const tweets = tweetsData.map((item: any, index: number) => {
+      return (
+        <Tweet key={index} data={item} />
       );
     });
 
@@ -95,6 +114,9 @@ export default class SearchInput extends React.Component<IProps, IState> {
         <HashtagsWrapper>
           {items}
         </HashtagsWrapper>
+        <TweetsWrapper>
+          {tweets}
+        </TweetsWrapper>
       </div>
     );
   }
