@@ -3,29 +3,28 @@
  */
 
 import * as React from 'react'
+import styled from 'styled-components';
 
 import styles from './styles.css'
 import SearchInput from "./components/search-input";
 
 export type Props = { text: string }
 
+const Wrapper = styled.div`
+  margin-top: 50px;
+  margin-left: 50px;
+`;
+
 export default class ExampleComponent extends React.Component<Props> {
-  public onSearchChange = async (search: string) => {
-    await this.setState({search});
-    console.log('search', search);
-  };
-
-
   render() {
-    const {
-      text
-    } = this.props;
+    // const {
+    //   text
+    // } = this.props;
 
     return (
-      <div className={styles.test}>
-        Example Component: {text}
-        <SearchInput onSearchChange={this.onSearchChange} />
-      </div>
+      <Wrapper className={styles.test}>
+        <SearchInput />
+      </Wrapper>
     )
   }
 }

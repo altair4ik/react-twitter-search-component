@@ -1,37 +1,65 @@
 import * as React from 'react';
-import './search-input.css';
-import {FormEvent} from "react";
+import styled from 'styled-components';
+import Hashtag from "../hashtag";
+
+const Input = styled.input`
+  border: none;
+  border-bottom: 1px solid #c1bfbf;
+  padding: 5px;
+`;
+
+const HashtagsWrapper = styled.div`
+  margin-top: 10px;
+  display: flex;
+`;
 
 interface IState {
-  term: string
+  hashtags: String[];
 }
 
-interface IProp {
-  onSearchChange: (search: string) => void
-}
+export default class SearchInput extends React.Component<{}, IState> {
 
-
-export default class SearchInput extends React.Component<IProp, IState> {
-
-  constructor(props: IProp) {
+  constructor(props: any) {
     super(props);
-    this.state = {term: ''}
+    this.state = {
+      hashtags: []
+    };
   }
 
-  public onTermChange = async (e: FormEvent<HTMLInputElement>) => {
-    await this.setState({term: e.currentTarget.value});
-    await this.props.onSearchChange(this.state.term);
+  keypressHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      const hashtags: String[] = this.state.hashtags;
+      hashtags.push(event.currentTarget.value);
+      event.currentTarget.value = '';
+      this.setState({hashtags});
+    }
   };
 
   public render() {
+    const del = (index: number) => {
+      const hashtags: String[] = this.state.hashtags;
+      hashtags.splice(index, 1);
+      this.setState({hashtags});
+    };
+    const hashtags: String[] = this.state.hashtags;
+    const items = hashtags.map((item: string, index: number) => {
+      return (
+        <Hashtag index={index} del={del} text={item} key={index} />
+      );
+    });
+
     return (
-      <input
-        type="text"
-        className="form-control search-input"
-        placeholder='Add hashtag...'
-        value={this.state.term}
-        onChange={this.onTermChange}
-      />
+      <div>
+        <Input
+          type="text"
+          className="form-control search-input"
+          placeholder='Add hashtag...'
+          onKeyPress={this.keypressHandler}
+        />
+        <HashtagsWrapper>
+          {items}
+        </HashtagsWrapper>
+      </div>
     );
   }
 }
