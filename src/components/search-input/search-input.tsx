@@ -17,14 +17,35 @@ interface IState {
   hashtags: String[];
 }
 
-export default class SearchInput extends React.Component<{}, IState> {
+interface IProps {
+  apiUrl: string;
+}
 
-  constructor(props: any) {
+export default class SearchInput extends React.Component<IProps, IState> {
+
+  constructor(props: IProps) {
     super(props);
     this.state = {
       hashtags: []
     };
   }
+
+  public searchTweets = async (searchStr: string, apiUrl: string) => {
+    var myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json; charset=utf-8');
+    const res = await fetch(apiUrl, {
+      method: 'post',
+      headers: myHeaders,
+      body: JSON.stringify({data: searchStr}),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Could not fetch, receives ${res.status}`);
+    }
+
+    const body = await res.json();
+    return body;
+  };
 
   keypressHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -32,6 +53,13 @@ export default class SearchInput extends React.Component<{}, IState> {
       hashtags.push(event.currentTarget.value);
       event.currentTarget.value = '';
       this.setState({hashtags});
+
+      this.searchTweets(hashtags.join(' '), this.props.apiUrl).then(result => {
+          console.log("result: ", JSON.parse(result.data));
+        },
+        error => {
+          console.log("error: ", error);
+        });
     }
   };
 
@@ -39,6 +67,14 @@ export default class SearchInput extends React.Component<{}, IState> {
     const del = (index: number) => {
       const hashtags: String[] = this.state.hashtags;
       hashtags.splice(index, 1);
+      if (hashtags.length > 0) {
+        this.searchTweets(hashtags.join(' '), this.props.apiUrl).then(result => {
+            console.log("result: ", JSON.parse(result.data));
+          },
+          error => {
+            console.log("error: ", error);
+          });
+      }
       this.setState({hashtags});
     };
     const hashtags: String[] = this.state.hashtags;
